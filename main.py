@@ -90,7 +90,8 @@ def main():
     # Encapsulate the model on the GPU assigned to the current process
     model = MNIST_MLP(input_size=784)
 
-    device = torch.device("cuda:{}".format(local_rank))
+    # Run model on GPU if CUDA is available
+    device = torch.device(f"cuda:{local_rank}" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
     ddp_model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[local_rank], output_device=local_rank)
 
