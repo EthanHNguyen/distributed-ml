@@ -84,8 +84,8 @@ def main():
     set_random_seeds(random_seed=random_seed)
 
     # Initializes the distributed backend which will take care of sychronizing nodes/GPUs
-    torch.distributed.init_process_group(backend="nccl")
-    # torch.distributed.init_process_group(backend="gloo")
+    # torch.distributed.init_process_group(backend="nccl")
+    torch.distributed.init_process_group(backend="gloo")
 
     # Encapsulate the model on the GPU assigned to the current process
     model = MNIST_MLP(input_size=784)
