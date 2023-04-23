@@ -1,0 +1,17 @@
+
+  worker_<WORKER_ID>:
+    type: OS::Nova::Server
+    depends_on: main_server
+    properties:
+      flavor: m1.medium
+      image: CC-Ubuntu20.04
+      security_groups:
+        - default
+      networks:
+          - subnet: {{ get_resource: internal_subnet }}
+      user_data: |
+        #!/bin/bash
+        git clone <REPOSITORY> repo
+        cd repo
+        pip install -r requirements.txt
+        python3 main.py

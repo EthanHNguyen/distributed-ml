@@ -1,0 +1,65 @@
+description: Distributed Training Network
+
+heat_template_version: 2018-08-31
+
+parameters:
+  Key:
+    type: string
+    description: Name of a key pair to enable SSH access to the main instance
+    constraints:
+    - custom_constraint: nova.keypair
+
+resources:
+  internal_net:
+    type: OS::Neutron::Net
+
+  internal_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: { get_resource: internal_net }
+      cidr: "10.8.1.0/24"
+      dns_nameservers: [ "8.8.8.8", "8.8.4.4" ]
+      ip_version: 4
+
+  internal_router:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info: { network: public }
+
+  internal_interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: internal_router }
+      subnet: { get_resource: internal_subnet }
+
+  main_port:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_resource: internal_net }
+      fixed_ips:
+        - ip_address: "10.8.1.250"
+      security_groups:
+        - default
+        - ENABLE_SSH
+
+  main_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: public
+      port_id: { get_resource: main_port }
+  
+  main_server:
+    type: OS::Nova::Server
+    properties:
+      flavor: m1.medium
+      image: CC-Ubuntu20.04
+      key_name: { get_param: Key }
+
+      networks:
+         - port: { get_resource: main_port }
+      user_data: |
+        #!/bin/bash
+        git clone <REPOSITORY> repo
+        cd repo
+        pip3 install -r requirements.txt
+        python3 main.py
