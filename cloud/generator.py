@@ -11,6 +11,7 @@ for i in range(workers):
     worker_str = default_worker_str.replace("<WORKER_ID>", str(i))
     template_str += worker_str
 
-print(template_str)
 with open("template.yml", "w") as f:
     f.write(template_str)
+
+print("Generated at template.yml!")

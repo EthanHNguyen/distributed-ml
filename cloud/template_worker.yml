@@ -8,7 +8,7 @@
       security_groups:
         - default
       networks:
-          - subnet: {{ get_resource: internal_subnet }}
+          - subnet: { get_resource: internal_subnet }
       user_data: |
         #!/bin/bash
         git clone <REPOSITORY> repo
