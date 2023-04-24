@@ -15,14 +15,15 @@ import numpy as np
 class MNIST_MLP(nn.Module):
         def __init__(self, input_size):
             super(MNIST_MLP, self).__init__()
-            self.fc1 = nn.Linear(input_size, 50)
-            self.relu = nn.ReLU()
-            self.fc2 = nn.Linear(50, 10)
+            self.net = nn.Sequential(
+                nn.Flatten(),
+                nn.Linear(input_size, 100),
+                nn.ReLU(),
+                nn.Linear(100, 10)
+            )
     
         def forward(self, x):
-            out = self.fc1(x)
-            out = self.relu(out)
-            out = self.fc2(out)
+            out = self.net(x)
             return out
 
 def set_random_seeds(random_seed=0):
@@ -71,7 +72,7 @@ def main():
     # parser.add_argument("--resume", action="store_true", help="Resume training from saved checkpoint.")
     argv = parser.parse_args()
 
-    local_rank = argv.local_rank
+    # local_rank = argv.local_rank
     num_epochs = argv.num_epochs
     batch_size = argv.batch_size
     learning_rate = argv.learning_rate
@@ -91,9 +92,9 @@ def main():
     model = MNIST_MLP(input_size=784)
 
     # Run model on GPU if CUDA is available
-    device = torch.device(f"cuda:{local_rank}" if torch.cuda.is_available() else "cpu")
-    model = model.to(device)
-    ddp_model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[local_rank], output_device=local_rank)
+    device = torch.device("cpu")
+    # model = model.to(device)
+    ddp_model = torch.nn.parallel.DistributedDataParallel(model)
 
     # We only save the model who uses device "cuda:0"
     # To resume, the device for the saved model would also be "cuda:0"
@@ -107,7 +108,7 @@ def main():
         transforms.Normalize((0.1307,), (0.3081,))
     ])
 
-    # Data should be prefetched
+    # FIXME - Data should be prefetched
     # Download should be set to be False, because it is not multiprocess safe
     train_set = torchvision.datasets.MNIST(root="./data", train=True, download=True, transform=transform)
     test_set = torchvision.datasets.MNIST(root="./data", train=False, download=True, transform=transform)
@@ -115,12 +116,12 @@ def main():
     # Restricts data loading to a subset of the dataset exclusive to the current process
     train_sampler = DistributedSampler(dataset=train_set)
 
-    train_loader = DataLoader(dataset=train_set, batch_size=batch_size, shuffle=True, sampler=train_sampler, num_workers=2)
+    train_loader = DataLoader(dataset=train_set, batch_size=batch_size, shuffle=False, sampler=train_sampler, num_workers=2)
     # Test loader does not have to follow distributed sampling strategy
     test_loader = DataLoader(dataset=test_set, batch_size=128, shuffle=False, num_workers=2)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.ADAM(ddp_model.parameters(), lr=learning_rate)
+    optimizer = optim.Adam(ddp_model.parameters(), lr=learning_rate)
 
     # Loop over the dataset multiple times
     for epoch in range(num_epochs):
