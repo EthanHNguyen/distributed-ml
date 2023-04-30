@@ -88,5 +88,5 @@ class MNISTDataModule(pl.LightningDataModule):
         return DataLoader(self.mnist_predict, batch_size=self.batch_size, num_workers=2)
 
 if __name__ == "__main__":
-    cli = LightningCLI(MNIST_MLP, MNISTDataModule, seed_everything_default=0)
+    cli = LightningCLI(MNIST_MLP, MNISTDataModule, seed_everything_default=0, max_epochs=5)
 
