@@ -13,5 +13,9 @@
         #!/bin/bash
         git clone <REPOSITORY> repo
         cd repo
-        pip install -r requirements.txt
-        python3 main.py
+        pip3 install -r requirements.txt
+        export MASTER_PORT=5555
+        export MASTER_ADDR=10.8.1.250
+        export WORLD_SIZE=<NUM_NODES>
+        export NODE_RANK=<WORKER_ID>
+        python3 main.py fit --trainer.accelerator cpu --trainer.strategy ddp --trainer.num_nodes <NUM_NODES>

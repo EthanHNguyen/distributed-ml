@@ -61,5 +61,9 @@ resources:
         #!/bin/bash
         git clone <REPOSITORY> repo
         cd repo
+        cd <WORKING_DIR>
         pip3 install -r requirements.txt
-        python3 main.py
+        export MASTER_PORT=5555
+        export WORLD_SIZE=<NUM_NODES>
+        export NODE_RANK=0
+        python3 <ENTRYPOINT> fit --trainer.accelerator cpu --trainer.strategy ddp --trainer.num_nodes <NUM_NODES>
