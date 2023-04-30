@@ -68,4 +68,4 @@ resources:
         export WORLD_SIZE=<NUM_NODES>
         export NODE_RANK=0
         export GLOO_SOCKET_IFNAME=ens3
-        python3 <ENTRYPOINT> fit --trainer.accelerator cpu --trainer.strategy ddp --trainer.num_nodes <NUM_NODES>
+        python3 <ENTRYPOINT> fit --trainer.accelerator cpu --trainer.strategy ddp --trainer.num_nodes <NUM_NODES> &> /train_log.txt
