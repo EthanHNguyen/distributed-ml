@@ -59,6 +59,7 @@ resources:
          - port: { get_resource: main_port }
       user_data: |
         #!/bin/bash
+        cd
         git clone <REPOSITORY> repo
         cd repo
         cd <WORKING_DIR>

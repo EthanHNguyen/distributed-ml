@@ -11,6 +11,7 @@
           - subnet: { get_resource: internal_subnet }
       user_data: |
         #!/bin/bash
+        cd
         git clone <REPOSITORY> repo
         cd repo
         cd <WORKING_DIR>
