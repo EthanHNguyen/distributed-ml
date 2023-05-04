@@ -8,6 +8,7 @@ from torch.utils.data import random_split, DataLoader
 import pytorch_lightning as pl
 from pytorch_lightning.cli import LightningCLI
 import numpy as np
+import time
 
 class MNIST_MLP(pl.LightningModule):
     def __init__(self):
@@ -38,6 +39,7 @@ class MNIST_MLP(pl.LightningModule):
         y_pred = self.net(x)
         acc = np.mean((torch.argmax(y_pred, dim=1) == y).cpu().numpy())
         self.log("val_acc", acc, sync_dist=True)
+        print(f"v - Current time: {time.time()}")
 
     def test_step(self, batch, batch_idx):
         x, y = batch
@@ -88,5 +90,6 @@ class MNISTDataModule(pl.LightningDataModule):
         return DataLoader(self.mnist_predict, batch_size=self.batch_size, num_workers=2)
 
 if __name__ == "__main__":
-    cli = LightningCLI(MNIST_MLP, MNISTDataModule, seed_everything_default=0, trainer_defaults=dict(max_epochs=5))
+    print(f"Start time: {time.time()}")
+    cli = LightningCLI(MNIST_MLP, MNISTDataModule, seed_everything_default=0, trainer_defaults=dict(max_epochs=10))
 
